@@ -81,7 +81,7 @@ def filehandler(update, context):
 def photohandler(update,context):
     vir = []
     for p in update.message.photo:
-        file = bot.getFile(p.file_id).download_as_bytearray()
+        file = context.bot.getFile(p.file_id).download_as_bytearray()
         stat, virus = checkvirus(bytes2io(file))
         if stat == True:
             vir.append((p,virus))
