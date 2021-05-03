@@ -1,4 +1,4 @@
-import sys, logging, io
+import sys, logging, io, subprocess
 exit = sys.exit
 from modules.pip_install import install
 logging.basicConfig(level=logging.INFO,format="%(asctime)s %(levelname)s[%(name)s] %(message)s")
@@ -11,6 +11,12 @@ from telegram.utils.helpers import escape_markdown, mention_markdown
 
 def em(s):
     return escape_markdown(text=s,version=2)
+
+remote = "Canot get git remote infomation\!"
+try:
+    remote = em(subprocess.run(["/usr/bin/git", "remote", "-v"], capture_output=True).stdout.decode('utf-8'))
+except subprocess.CalledProcessError:
+    pass
 
 try:
     import clamd
@@ -111,6 +117,9 @@ def teststringhandler(update,context):
     update.message.reply_text(clamd.EICAR.decode('utf-8'))
     texthandler(update, context)
 
+def remotehandler(update,context):
+    update.message.reply_text("```\n{}\n```".format(remote),parse_mode=ParseMode.MARKDOWN_V2)
+
 def main(tok):
     if tok == "":
         log.critical("No token!")
@@ -127,6 +136,7 @@ def main(tok):
     dp.add_handler(CommandHandler("ping", pinghandler))
     dp.add_handler(CommandHandler("testfile", testfilehandler))
     dp.add_handler(CommandHandler("teststring", teststringhandler))
+    dp.add_handler(CommandHandler("remote", remotehandler))
     dp.add_handler(MessageHandler(Filters.document,filehandler))
     dp.add_handler(MessageHandler(Filters.photo,photohandler))
     dp.add_handler(MessageHandler(Filters.text,texthandler))
